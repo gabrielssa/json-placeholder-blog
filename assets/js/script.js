@@ -1,13 +1,51 @@
-let myInput = document.querySelector("input");
-let myList = document.querySelector("ul");
+// https://jsonplaceholder.typicode.com/posts
 
-const handleKeyPress = function(e){
-    if(e.key == 'Enter'){
-        let newLi = document.createElement("li");
-        newLi.append(myInput.value);
-        myInput.value = '';
-        myList.appendChild(newLi)
-    };
+async function readPosts(){
+    let postArea = document.querySelector('.posts');
+    postArea.innerHTML = 'Carregando...';
+
+    let response = await fetch('https://jsonplaceholder.typicode.com/posts');
+    let json = await response.json();
+
+    if(json.length > 0){
+        postArea.innerHTML = '';
+
+        for(let i in json){
+            let postHtml = `<div><h1>${json[i].title}</h1>${json[i].body}</div>`;
+            postArea.innerHTML += postHtml;
+        }
+    }else{
+        postArea.innerHTML ='Nenhum post para exibir';
+    }
+}
+
+async function addNewPost(title, body){
+    response = fetch('https://jsonplaceholder.typicode.com/posts',{
+        method:'POST',
+        headers:{
+            'Content-Type':'application/json'
+        },
+        body: JSON.stringify({
+            title,
+            body,
+            userId: 2
+        })
+    });
+
+    document.querySelector('#titleField').value = '';
+    document.querySelector('#bodyField').value = '';
+
+    readPosts();
 };
 
-myInput.addEventListener('keypress', handleKeyPress);
+document.querySelector('#insertButton').addEventListener('click', () =>{
+    let title = document.querySelector('#titleField').value;
+    let body = document.querySelector('#bodyField').value;
+
+    if(title && body){
+        addNewPost(title, body);
+    }else{
+        alert('Preencha todos os campos.')
+    }
+});
+readPosts();
